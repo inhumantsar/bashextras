@@ -1,0 +1,87 @@
+# reference this file at the end of any .bashrc
+
+# get bashextra's directory
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+# Let's re-use ssh-agent and/or gpg-agent between logins
+if [ -f /usr/bin/keychain ]; then
+	/usr/bin/keychain $HOME/.ssh/*id_?sa
+	source $HOME/.keychain/$HOSTNAME-sh
+fi
+
+# handy colour names
+source $DIR/promptcolours
+
+# to add git branch to PS1
+source $DIR/gitprompt
+
+# aliases
+source $DIR/aliases
+
+# dircolors
+if [ -x /usr/bin/dircolors ]; then
+    test -r $DIR/dircolors && eval "$(dircolors -b $DIR/dircolors)" || eval "$(dircolors -b)"
+fi
+
+# syntax highlighting for less
+# requires source-highlight package (debian/ubuntu)
+if [ -f /usr/share/source-highlight/src-hilite-lesspipe.sh ]; then
+  export LESSOPEN="| /usr/share/source-highlight/src-hilite-lesspipe.sh %s"
+  export LESS=' -R '
+fi
+
+# eye candy
+function build_prompt {
+  exitcode=$?
+
+  # build exit code smiley
+  face="${bldylw}O.o${txtrst}" # confused by default
+  if [ $exitcode -eq 0 ]; then face="${txtgrn}^_^${txtrst}"; else face="${bldred}0_0${txtrst}"; fi
+ 
+  # build date time 
+  dt="${txtcyn}`date +\"%H:%M:%S"`${txtrst}"
+  
+  # build free memory
+  mem=''
+  freemem=`sed -nu "s/^MemFree:[\t ]\+\([0-9]\+\) kB/\1/p" /proc/meminfo`
+  cachedmem=`sed -nu "s/^Cached:[\t ]\+\([0-9]\+\) kB/\1/p" /proc/meminfo`
+  buffermem=`sed -nu "s/^Buffers:[\t ]\+\([0-9]\+\) kB/\1/p" /proc/meminfo`
+  totalmem=`echo "$(sed -nu 's/MemTotal:[\t ]\+\([0-9]\+\) kB/\1/p' /proc/meminfo) / 1024" | bc`
+  actualfree=`echo "(${freemem} + ${cachedmem} + ${buffermem}) / 1024" | bc`
+  if [ `echo "$actualfree <= ($totalmem * 0.1)" | bc` -eq 1 ]; then mem="${bldred}${actualfree}M${txtrst}";
+  elif [ `echo "$actualfree > ($totalmem * 0.1)" | bc` -eq 1 ] && [ `echo "$actualfree <= ($totalmem * 0.2)" | bc` -eq 1 ]; then mem="${txtylw}${actualfree}M${txtrst}";
+  else mem="${txtgrn}${actualfree}M${txtrst}"
+  fi
+  mem="(${mem})"
+
+  # build load display
+  load=""
+  load_1min=`echo $(< /proc/loadavg) | cut -f 1 -d\ `
+  cpucount=`grep -c ^processor /proc/cpuinfo`
+  if [ `echo "$load_1min >= $cpucount" | bc` -eq 1 ]; then load="${bldred}${load_1min}${txtrst}";
+  elif [ `echo "$load_1min >= ($cpucount/2)" | bc` -eq 1 ] && [ `echo "$load_1min < $cpucount" | bc` -eq 1 ]; then load="${txtylw}${load_1min}${txtrst}";
+  else load="${txtgrn}${load_1min}${txtrst}"
+  fi
+  load="(${load})"
+
+  # get user and host names
+  user=`whoami`
+  host=`hostname -s`
+  userhost="${txtwht}[${user}@${host}]${txtrst}"
+
+  # get pwd. this emulates bash's expansion of \w to give ~ instead of /home/moo
+  wd=`pwd | sed -E "s-^$HOME($|(/.*))-~\2-"`
+  wd="${txtcyn}${wd}$(__git_ps1)${txtrst}"
+
+  #printf ' %3s %-16s %-25s %-23s %7s %7s' $face $dt $userhost $mem $load $wd
+  echo -e " ${face} ${dt} ${userhost} ${mem} ${load} ${wd}"
+}
+
+PROMPT_COMMAND='build_prompt'
+PS1="\$ "

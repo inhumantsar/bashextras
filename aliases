@@ -1,0 +1,6 @@
+#!/bin/bash
+
+alias l="ls --color=auto -alh"
+alias dush="du -sh *"
+alias attach="screen -Adr"
+alias ack="ack-grep"

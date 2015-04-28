@@ -17,4 +17,8 @@ Clone this repo down anywhere (perhaps someplace only you or root can write to?)
 
 ## Thanks
 
-There are a whole host of people who contributed to this indirectly, usually via blog posts, but I never kept track of them. If you recognize a bit of a code or know of the originator of an idea that's used here, please let me know.
+gitprompt code was written by Shawn O. Pearce <spearce@spearce.org>
+
+There are a whole host of other people who contributed to this indirectly, usually via blog posts, but I never kept track of them. If you recognize a bit of a code or know of the originator of an idea that's used here, please let me know.
+
+

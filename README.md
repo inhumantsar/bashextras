@@ -6,7 +6,7 @@ Anything you might wanna do to the bash prompt (or any other Linux commandline a
 
 ## Installation
 
-Clone this repo down anywhere (perhaps someplace only you or root can write to?) and add `source /path/to/bashextras` to ~/.bashrc.
+Clone this repo down anywhere (perhaps someplace only you or root can write to?) and add `source /path/to/bashextras` to `~/.bashrc` or `/etc/bash.bashrc`.
 
 ## Known Issues
 

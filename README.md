@@ -2,6 +2,8 @@
 
 Anything you might wanna do to the bash prompt (or any other Linux commandline application that keeps it's config in ~/.something) can go in here. As is, it sets up a fancy PS1 with indicators for memory usage, CPU load, pwd, git repo status (current branch mainly) and $?.
 
+![bashextras screenshot](screenshot.png)
+
 ## Installation
 
 Clone this repo down anywhere (perhaps someplace only you or root can write to?) and add `source /path/to/bashextras` to ~/.bashrc.

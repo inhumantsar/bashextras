@@ -76,6 +76,7 @@ function build_prompt {
   userhost="${txtwht}[${user}@${host}]${txtrst}"
 
   # get pwd. this emulates bash's expansion of \w to give ~ instead of /home/moo
+  # add git information if applicable
   wd=`pwd | sed -E "s-^$HOME($|(/.*))-~\2-"`
   wd="${txtcyn}${wd}$(__git_ps1)${txtrst}"
 

@@ -8,6 +8,8 @@ Anything you might wanna do to the bash prompt (or any other Linux commandline a
 
 Clone this repo down anywhere (perhaps someplace only you or root can write to?) and add `source /path/to/bashextras` to `~/.bashrc` or `/etc/bash.bashrc`.
 
+The `master` branch tracks code that works for Linux (Debian/Ubuntu specifically). Other branches are named for their OS flavours (eg: darwin).
+
 ## Known Issues
 
  - The whole thing is very Debian/Ubuntu centric. YMMV.

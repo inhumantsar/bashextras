@@ -48,28 +48,28 @@ function build_prompt {
   dt="${txtcyn}`date +\"%H:%M:%S"`${txtrst}"
   
   # build free memory
-  mem=''
-  freemem=`sed -nu "s/^MemFree:[\t ]\+\([0-9]\+\) kB/\1/p" /proc/meminfo`
-  cachedmem=`sed -nu "s/^Cached:[\t ]\+\([0-9]\+\) kB/\1/p" /proc/meminfo`
-  buffermem=`sed -nu "s/^Buffers:[\t ]\+\([0-9]\+\) kB/\1/p" /proc/meminfo`
-  totalmem=`echo "$(sed -nu 's/MemTotal:[\t ]\+\([0-9]\+\) kB/\1/p' /proc/meminfo) / 1024" | bc`
-  actualfree=`echo "(${freemem} + ${cachedmem} + ${buffermem}) / 1024" | bc`
-  if [ `echo "$actualfree <= ($totalmem * 0.1)" | bc` -eq 1 ]; then mem="${bldred}${actualfree}M${txtrst}";
-  elif [ `echo "$actualfree > ($totalmem * 0.1)" | bc` -eq 1 ] && [ `echo "$actualfree <= ($totalmem * 0.2)" | bc` -eq 1 ]; then mem="${txtylw}${actualfree}M${txtrst}";
-  else mem="${txtgrn}${actualfree}M${txtrst}"
-  fi
-  mem="(${mem})"
-
-  # build load display
-  load=""
-  load_1min=`echo $(< /proc/loadavg) | cut -f 1 -d\ `
-  cpucount=`grep -c ^processor /proc/cpuinfo`
-  if [ `echo "$load_1min >= $cpucount" | bc` -eq 1 ]; then load="${bldred}${load_1min}${txtrst}";
-  elif [ `echo "$load_1min >= ($cpucount/2)" | bc` -eq 1 ] && [ `echo "$load_1min < $cpucount" | bc` -eq 1 ]; then load="${txtylw}${load_1min}${txtrst}";
-  else load="${txtgrn}${load_1min}${txtrst}"
-  fi
-  load="(${load})"
-
+#  mem=''
+#  freemem=`sed -n "s/^MemFree:[\t ]\+\([0-9]\+\) kB/\1/p" /proc/meminfo`
+#  cachedmem=`sed -n "s/^Cached:[\t ]\+\([0-9]\+\) kB/\1/p" /proc/meminfo`
+#  buffermem=`sed -n "s/^Buffers:[\t ]\+\([0-9]\+\) kB/\1/p" /proc/meminfo`
+#  totalmem=`echo "$(sed -n 's/MemTotal:[\t ]\+\([0-9]\+\) kB/\1/p' /proc/meminfo) / 1024" | bc`
+#  actualfree=`echo "(${freemem} + ${cachedmem} + ${buffermem}) / 1024" | bc`
+#  if [ `echo "$actualfree <= ($totalmem * 0.1)" | bc` -eq 1 ]; then mem="${bldred}${actualfree}M${txtrst}";
+#  elif [ `echo "$actualfree > ($totalmem * 0.1)" | bc` -eq 1 ] && [ `echo "$actualfree <= ($totalmem * 0.2)" | bc` -eq 1 ]; then mem="${txtylw}${actualfree}M${txtrst}";
+#  else mem="${txtgrn}${actualfree}M${txtrst}"
+#  fi
+#  mem="(${mem})"
+#
+#  # build load display
+#  load=""
+#  load_1min=`echo $(< /proc/loadavg) | cut -f 1 -d\ `
+#  cpucount=`grep -c ^processor /proc/cpuinfo`
+#  if [ `echo "$load_1min >= $cpucount" | bc` -eq 1 ]; then load="${bldred}${load_1min}${txtrst}";
+#  elif [ `echo "$load_1min >= ($cpucount/2)" | bc` -eq 1 ] && [ `echo "$load_1min < $cpucount" | bc` -eq 1 ]; then load="${txtylw}${load_1min}${txtrst}";
+#  else load="${txtgrn}${load_1min}${txtrst}"
+#  fi
+#  load="(${load})"
+  
   # get user and host names
   user=`whoami`
   host=`hostname -s`
@@ -81,7 +81,8 @@ function build_prompt {
   wd="${txtcyn}${wd}$(__git_ps1)${txtrst}"
 
   #printf ' %3s %-16s %-25s %-23s %7s %7s' $face $dt $userhost $mem $load $wd
-  echo -e " ${face} ${dt} ${userhost} ${mem} ${load} ${wd}"
+  #echo -e " ${face} ${dt} ${userhost} ${mem} ${load} ${wd}"
+  echo -e " ${face} ${dt} ${userhost} ${wd}"
 }
 
 PROMPT_COMMAND='build_prompt'

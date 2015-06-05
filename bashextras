@@ -15,6 +15,11 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 #	source $HOME/.keychain/$HOSTNAME-sh
 #fi
 
+# disable gnome-ssh-askpass if there's a desktop env running
+if [ "$DESKTOP_SESSION" == "" ]; then
+  unset SSH_ASKPASS
+fi
+
 # start ssh agent and set environment variables, if needed
 if ! env | grep -q SSH_AGENT_PID >/dev/null; then
   echo "Starting ssh agent"

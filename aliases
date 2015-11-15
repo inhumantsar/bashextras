@@ -5,6 +5,24 @@ alias dush="du -sh *"
 alias attach="screen -Adr"
 alias ack="ack-grep"
 
+# these load the ssh key as needed rather than ever damn time 
+# i log the fuck in. see also: ssh-agent
+ssh() {
+  if ! ssh-add -l >/dev/null 2>&-; then
+    ssh-add ~/.ssh/id_rsa
+  fi
+  /usr/bin/ssh "$@"
+}
+export -f ssh
+
+git() {
+  if ! ssh-add -l >/dev/null 2>&-; then
+    ssh-add ~/.ssh/id_rsa
+  fi
+  /usr/bin/git "$@"
+}
+export -f git
+
 sr() {
   if [ "$1" == "" ]; then
     echo "Usage: sr <host> <ssh opts>"

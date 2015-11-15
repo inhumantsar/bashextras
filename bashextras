@@ -10,11 +10,22 @@ done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 # Let's re-use ssh-agent and/or gpg-agent between logins
-if [ -f /usr/bin/keychain ]; then
-	/usr/bin/keychain $HOME/.ssh/*id_?sa
-	source $HOME/.keychain/$HOSTNAME-sh
+#if [ -f /usr/bin/keychain ]; then
+#	/usr/bin/keychain $HOME/.ssh/*id_?sa
+#	source $HOME/.keychain/$HOSTNAME-sh
+#fi
+
+# disable gnome-ssh-askpass if there's a desktop env running
+if [ "$DESKTOP_SESSION" == "" ]; then
+  unset SSH_ASKPASS
 fi
 
+# start ssh agent and set environment variables, if needed
+if ! env | grep -q SSH_AGENT_PID >/dev/null; then
+  echo "Starting ssh agent"
+  eval $(ssh-agent -s)
+fi
+       
 # handy colour names
 source $DIR/promptcolours
 

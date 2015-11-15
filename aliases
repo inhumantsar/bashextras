@@ -4,3 +4,13 @@ alias l="ls --color=auto -alh"
 alias dush="du -sh *"
 alias attach="screen -Adr"
 alias ack="ack-grep"
+
+sr() {
+  if [ "$1" == "" ]; then
+    echo "Usage: sr <host> <ssh opts>"
+    return 1
+  fi
+  host="$1"
+  shift
+  ssh root@$host $@
+}

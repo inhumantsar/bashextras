@@ -57,6 +57,10 @@ if [ -f /usr/local/bin/aws ] && [ -f /usr/local/bin/aws_completer ]; then
   complete -C '/usr/local/bin/aws_completer' aws
 fi
 
+### urthecast specific
+source $DIR/urthecast
+
+
 # eye candy
 function build_prompt {
   exitcode=$?
@@ -101,9 +105,12 @@ function build_prompt {
   wd=`pwd | sed -E "s-^$HOME($|(/.*))-~\2-"`
   wd="${txtcyn}${wd}$(__git_ps1)${txtrst}"
 
+  # add aws default profile
+  aws="${txtpur}(${AWS_DEFAULT_PROFILE})${txtrst}"
+
   #printf ' %3s %-16s %-25s %-23s %7s %7s' $face $dt $userhost $mem $load $wd
   #echo -e " ${face} ${dt} ${userhost} ${mem} ${load} ${wd}"
-  echo -e " ${face} ${dt} ${userhost} ${wd}"
+  echo -e " ${face} ${dt} ${userhost} ${aws} ${wd}"
 }
 
 PROMPT_COMMAND='build_prompt'

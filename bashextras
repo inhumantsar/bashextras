@@ -25,7 +25,7 @@ if ! env | grep -q SSH_AGENT_PID >/dev/null; then
   echo "Starting ssh agent"
   eval $(ssh-agent -s)
 fi
-       
+
 # handy colour names
 source $DIR/promptcolours
 
@@ -47,6 +47,16 @@ if [ -f /usr/share/source-highlight/src-hilite-lesspipe.sh ]; then
   export LESS=' -R '
 fi
 
+# homebrew bash completion
+if [ -f $(brew --prefix)/etc/bash_completion ]; then
+   . $(brew --prefix)/etc/bash_completion
+fi
+
+# awscli bash completion
+if [ -f /usr/local/bin/aws ] && [ -f /usr/local/bin/aws_completer ]; then
+  complete -C '/usr/local/bin/aws_completer' aws
+fi
+
 # eye candy
 function build_prompt {
   exitcode=$?
@@ -54,10 +64,10 @@ function build_prompt {
   # build exit code smiley
   face="${bldylw}O.o${txtrst}" # confused by default
   if [ $exitcode -eq 0 ]; then face="${txtgrn}^_^${txtrst}"; else face="${bldred}0_0${txtrst}"; fi
- 
-  # build date time 
+
+  # build date time
   dt="${txtcyn}`date +\"%H:%M:%S"`${txtrst}"
-  
+
   # build free memory
 #  mem=''
 #  freemem=`sed -n "s/^MemFree:[\t ]\+\([0-9]\+\) kB/\1/p" /proc/meminfo`
@@ -80,7 +90,7 @@ function build_prompt {
 #  else load="${txtgrn}${load_1min}${txtrst}"
 #  fi
 #  load="(${load})"
-  
+
   # get user and host names
   user=`whoami`
   host=`hostname -s`

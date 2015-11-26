@@ -5,7 +5,9 @@ function urthenv() {
     e="$1"
   fi
 
+  user=`whoami`
+
   export AWS_DEFAULT_PROFILE="$e"
-  ln -sf "~/.chef/$e.rb" ~/.chef/knife.rb
+  rm "/Users/${user}/.chef/knife.rb" && ln -s "/Users/${user}/.chef/${e}.rb" "/Users/${user}/.chef/knife.rb"
 }
 urthenv

@@ -9,23 +9,14 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-# Let's re-use ssh-agent and/or gpg-agent between logins
-#if [ -f /usr/bin/keychain ]; then
-#	/usr/bin/keychain $HOME/.ssh/*id_?sa
-#	source $HOME/.keychain/$HOSTNAME-sh
-#fi
-
 # disable gnome-ssh-askpass if there's a desktop env running
 if [ "$DESKTOP_SESSION" == "" ]; then
   unset SSH_ASKPASS
 fi
 
-# start ssh agent and set environment variables, if needed
-if ! env | grep -q SSH_AGENT_PID >/dev/null; then
-  echo "Starting ssh agent"
-  eval $(ssh-agent -s)
-fi
-       
+# ssh agent
+source $DIR/ssh_agent
+
 # handy colour names
 source $DIR/promptcolours
 
@@ -54,10 +45,10 @@ function build_prompt {
   # build exit code smiley
   face="${bldylw}O.o${txtrst}" # confused by default
   if [ $exitcode -eq 0 ]; then face="${txtgrn}^_^${txtrst}"; else face="${bldred}0_0${txtrst}"; fi
- 
-  # build date time 
+
+  # build date time
   dt="${txtcyn}`date +\"%H:%M:%S"`${txtrst}"
-  
+
   # build free memory
   mem=''
   freemem=`sed -nu "s/^MemFree:[\t ]\+\([0-9]\+\) kB/\1/p" /proc/meminfo`

@@ -7,7 +7,78 @@ function urthenv() {
 
   user=`whoami`
 
+  export AWS_DEFAULT_REGION="us-east-1"
   export AWS_DEFAULT_PROFILE="$e"
   rm "/Users/${user}/.chef/knife.rb" && ln -s "/Users/${user}/.chef/${e}.rb" "/Users/${user}/.chef/knife.rb"
 }
 urthenv
+
+function uidgrep() {
+  grep uid *.json | sed -Ee 's/.+ ([0-9]+),/\1/' | sort -n
+}
+
+function knifeup() {
+  if [ -z "$1" ]; then echo "Please provide 1+ cookbook names"; exit 1; fi
+  knife cookbook upload $@ -o ~/Source/chef/cookbooks
+}
+
+function kniferole() {
+  if [ -z "$1" ]; then echo "Please provide 1+ role names"; exit 1; fi
+  for r in $@; do
+    knife role from file ~/Source/chef/roles/$r
+  done
+}
+
+function allenvs() {
+  orig=$AWS_DEFAULT_PROFILE
+  for i in "dev" "sit" "prod"; do
+    echo "$i..." 
+    urthenv $i
+    $@
+  done
+  urthenv $orig
+}
+
+alias gfh='gfh --auth=c21hcnRpbjpJIGNhbiBzZWUgbXkgaG91c2UgZnJvbSBoZXJlIQ=='
+
+function sk-admin-sit() {
+  sshloop -i ~/.ssh/admin_sit $@
+}
+
+function sk-admin-prod() {
+  sshloop -i ~/.ssh/admin_prod $@
+}
+
+function sk-admin-dev() {
+  sshloop -i ~/.ssh/admin_dev $@
+}
+
+function sk-admin-corp() {
+  sshloop -i ~/.ssh/admin_corp $@
+}
+
+function sk-jenkins-ci-worker() {
+  sshloop -i ~/.ssh/jenkins-ci-worker $@
+}
+
+function sk-jenkins-root-dev() {
+  sshloop -i ~/.ssh/jenkins_root_dev $@
+}
+
+function sk-jenkins-root-sit() {
+  sshloop -i ~/.ssh/jenkins_root_sit $@
+}
+
+function sk-smartin-dev() {
+  sshloop -i ~/.ssh/admin_sit.pem $@
+}
+
+function sk-admin-sit() {
+  sshloop -i ~/.ssh/admin_sit $@
+}
+
+function sk-admin-sit() {
+  sshloop -i ~/.ssh/admin_sit $@
+}
+
+

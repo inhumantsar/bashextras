@@ -32,3 +32,11 @@ sr() {
   shift
   ssh root@$host $@
 }
+
+pycompile() {
+  python -m py_compile $@
+}
+
+sshloop() {
+  while True; do sleep 3; ssh $@ && break; done
+}

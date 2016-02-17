@@ -9,7 +9,8 @@ function urthenv() {
 
   export AWS_DEFAULT_REGION="us-east-1"
   export AWS_DEFAULT_PROFILE="$e"
-  rm "~/.chef/knife.rb" 2>&1 /dev/null; ln -s "~/.chef/${e}.rb" "~/.chef/knife.rb"
+  rm ~/.chef/knife.rb
+  ln -s ~/.chef/${e}.rb ~/.chef/knife.rb
 }
 urthenv
 

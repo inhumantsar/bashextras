@@ -9,7 +9,7 @@ function urthenv() {
 
   export AWS_DEFAULT_REGION="us-east-1"
   export AWS_DEFAULT_PROFILE="$e"
-  rm "/Users/${user}/.chef/knife.rb" && ln -s "/Users/${user}/.chef/${e}.rb" "/Users/${user}/.chef/knife.rb"
+  rm "~/.chef/knife.rb" && ln -s "~/.chef/${e}.rb" "~/.chef/knife.rb"
 }
 urthenv
 
@@ -19,20 +19,20 @@ function uidgrep() {
 
 function knifeup() {
   if [ -z "$1" ]; then echo "Please provide 1+ cookbook names"; exit 1; fi
-  knife cookbook upload $@ -o ~/Source/chef/cookbooks
+  knife cookbook upload $@ -o ~/source/chef/cookbooks
 }
 
 function kniferole() {
   if [ -z "$1" ]; then echo "Please provide 1+ role names"; exit 1; fi
   for r in $@; do
-    knife role from file ~/Source/chef/roles/$r
+    knife role from file ~/source/chef/roles/$r
   done
 }
 
 function allenvs() {
   orig=$AWS_DEFAULT_PROFILE
   for i in "dev" "sit" "prod"; do
-    echo "$i..." 
+    echo "$i..."
     urthenv $i
     $@
   done
@@ -80,5 +80,3 @@ function sk-admin-sit() {
 function sk-admin-sit() {
   sshloop -i ~/.ssh/admin_sit $@
 }
-
-

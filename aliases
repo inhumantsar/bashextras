@@ -38,5 +38,5 @@ pycompile() {
 }
 
 sshloop() {
-  while True; do sleep 3; ssh $@ && break; done
+  while [[ 1 -eq 1 ]]; do sleep 3; ssh $@ && break; done
 }

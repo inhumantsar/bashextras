@@ -27,17 +27,17 @@ if ! env | grep -q SSH_AGENT_PID >/dev/null; then
 fi
 
 # handy colour names
-source $DIR/promptcolours
+source "$DIR/promptcolours"
 
 # to add git branch to PS1
-source $DIR/gitprompt
+source "$DIR/gitprompt"
 
 # aliases
-source $DIR/aliases
+source "$DIR/aliases"
 
 # dircolors
 if [ -x /usr/bin/dircolors ]; then
-    test -r $DIR/dircolors && eval "$(dircolors -b $DIR/dircolors)" || eval "$(dircolors -b)"
+    test -r "$DIR/dircolors" && eval $(dircolors -b "$DIR/dircolors") || eval "$(dircolors -b)"
 fi
 
 # syntax highlighting for less
@@ -59,9 +59,6 @@ if [ -f /usr/local/bin/aws ] && [ -f /usr/local/bin/aws_completer ]; then
   complete -C '/usr/local/bin/aws_completer' aws
 fi
 
-### urthecast specific
-source $DIR/urthecast
-
 
 # eye candy
 function build_prompt {
@@ -75,27 +72,27 @@ function build_prompt {
   dt="${txtcyn}`date +\"%H:%M:%S"`${txtrst}"
 
   # build free memory
-#  mem=''
-#  freemem=`sed -n "s/^MemFree:[\t ]\+\([0-9]\+\) kB/\1/p" /proc/meminfo`
-#  cachedmem=`sed -n "s/^Cached:[\t ]\+\([0-9]\+\) kB/\1/p" /proc/meminfo`
-#  buffermem=`sed -n "s/^Buffers:[\t ]\+\([0-9]\+\) kB/\1/p" /proc/meminfo`
-#  totalmem=`echo "$(sed -n 's/MemTotal:[\t ]\+\([0-9]\+\) kB/\1/p' /proc/meminfo) / 1024" | bc`
-#  actualfree=`echo "(${freemem} + ${cachedmem} + ${buffermem}) / 1024" | bc`
-#  if [ `echo "$actualfree <= ($totalmem * 0.1)" | bc` -eq 1 ]; then mem="${bldred}${actualfree}M${txtrst}";
-#  elif [ `echo "$actualfree > ($totalmem * 0.1)" | bc` -eq 1 ] && [ `echo "$actualfree <= ($totalmem * 0.2)" | bc` -eq 1 ]; then mem="${txtylw}${actualfree}M${txtrst}";
-#  else mem="${txtgrn}${actualfree}M${txtrst}"
-#  fi
-#  mem="(${mem})"
-#
-#  # build load display
-#  load=""
-#  load_1min=`echo $(< /proc/loadavg) | cut -f 1 -d\ `
-#  cpucount=`grep -c ^processor /proc/cpuinfo`
-#  if [ `echo "$load_1min >= $cpucount" | bc` -eq 1 ]; then load="${bldred}${load_1min}${txtrst}";
-#  elif [ `echo "$load_1min >= ($cpucount/2)" | bc` -eq 1 ] && [ `echo "$load_1min < $cpucount" | bc` -eq 1 ]; then load="${txtylw}${load_1min}${txtrst}";
-#  else load="${txtgrn}${load_1min}${txtrst}"
-#  fi
-#  load="(${load})"
+  mem=''
+  freemem=`sed -n "s/^MemFree:[\t ]\+\([0-9]\+\) kB/\1/p" /proc/meminfo`
+  cachedmem=`sed -n "s/^Cached:[\t ]\+\([0-9]\+\) kB/\1/p" /proc/meminfo`
+  buffermem=`sed -n "s/^Buffers:[\t ]\+\([0-9]\+\) kB/\1/p" /proc/meminfo`
+  totalmem=`echo "$(sed -n 's/MemTotal:[\t ]\+\([0-9]\+\) kB/\1/p' /proc/meminfo) / 1024" | bc`
+  actualfree=`echo "(${freemem} + ${cachedmem} + ${buffermem}) / 1024" | bc`
+  if [ `echo "$actualfree <= ($totalmem * 0.1)" | bc` -eq 1 ]; then mem="${bldred}${actualfree}M${txtrst}";
+  elif [ `echo "$actualfree > ($totalmem * 0.1)" | bc` -eq 1 ] && [ `echo "$actualfree <= ($totalmem * 0.2)" | bc` -eq 1 ]; then mem="${txtylw}${actualfree}M${txtrst}";
+  else mem="${txtgrn}${actualfree}M${txtrst}"
+  fi
+  mem="(${mem})"
+
+  # build load display
+  load=""
+  load_1min=`echo $(< /proc/loadavg) | cut -f 1 -d\ `
+  cpucount=`grep -c ^processor /proc/cpuinfo`
+  if [ `echo "$load_1min >= $cpucount" | bc` -eq 1 ]; then load="${bldred}${load_1min}${txtrst}";
+  elif [ `echo "$load_1min >= ($cpucount/2)" | bc` -eq 1 ] && [ `echo "$load_1min < $cpucount" | bc` -eq 1 ]; then load="${txtylw}${load_1min}${txtrst}";
+  else load="${txtgrn}${load_1min}${txtrst}"
+  fi
+  load="(${load})"
 
   # get user and host names
   user=`whoami`
@@ -111,8 +108,7 @@ function build_prompt {
   aws="${txtpur}(${AWS_DEFAULT_PROFILE})${txtrst}"
 
   #printf ' %3s %-16s %-25s %-23s %7s %7s' $face $dt $userhost $mem $load $wd
-  #echo -e " ${face} ${dt} ${userhost} ${mem} ${load} ${wd}"
-  echo -e " ${face} ${dt} ${userhost} ${aws} ${wd}"
+  echo -e " ${face} ${dt} ${userhost} ${mem} ${load} ${wd}"
 }
 
 PROMPT_COMMAND='build_prompt'

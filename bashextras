@@ -18,17 +18,17 @@ fi
 source $DIR/ssh_agent
 
 # handy colour names
-source $DIR/promptcolours
+source "$DIR/promptcolours"
 
 # to add git branch to PS1
-source $DIR/gitprompt
+source "$DIR/gitprompt"
 
 # aliases
-source $DIR/aliases
+source "$DIR/aliases"
 
 # dircolors
 if [ -x /usr/bin/dircolors ]; then
-    test -r $DIR/dircolors && eval "$(dircolors -b $DIR/dircolors)" || eval "$(dircolors -b)"
+    test -r "$DIR/dircolors" && eval $(dircolors -b "$DIR/dircolors") || eval "$(dircolors -b)"
 fi
 
 # syntax highlighting for less
@@ -37,6 +37,19 @@ if [ -f /usr/share/source-highlight/src-hilite-lesspipe.sh ]; then
   export LESSOPEN="| /usr/share/source-highlight/src-hilite-lesspipe.sh %s"
   export LESS=' -R '
 fi
+
+# homebrew bash completion
+if [ `uname -s` == "Darwin" ]; then
+  if [ -f $(brew --prefix)/etc/bash_completion ]; then
+     . $(brew --prefix)/etc/bash_completion
+  fi
+fi
+
+# awscli bash completion
+if [ -f /usr/local/bin/aws ] && [ -f /usr/local/bin/aws_completer ]; then
+  complete -C '/usr/local/bin/aws_completer' aws
+fi
+
 
 # eye candy
 function build_prompt {
@@ -51,10 +64,10 @@ function build_prompt {
 
   # build free memory
   mem=''
-  freemem=`sed -nu "s/^MemFree:[\t ]\+\([0-9]\+\) kB/\1/p" /proc/meminfo`
-  cachedmem=`sed -nu "s/^Cached:[\t ]\+\([0-9]\+\) kB/\1/p" /proc/meminfo`
-  buffermem=`sed -nu "s/^Buffers:[\t ]\+\([0-9]\+\) kB/\1/p" /proc/meminfo`
-  totalmem=`echo "$(sed -nu 's/MemTotal:[\t ]\+\([0-9]\+\) kB/\1/p' /proc/meminfo) / 1024" | bc`
+  freemem=`sed -n "s/^MemFree:[\t ]\+\([0-9]\+\) kB/\1/p" /proc/meminfo`
+  cachedmem=`sed -n "s/^Cached:[\t ]\+\([0-9]\+\) kB/\1/p" /proc/meminfo`
+  buffermem=`sed -n "s/^Buffers:[\t ]\+\([0-9]\+\) kB/\1/p" /proc/meminfo`
+  totalmem=`echo "$(sed -n 's/MemTotal:[\t ]\+\([0-9]\+\) kB/\1/p' /proc/meminfo) / 1024" | bc`
   actualfree=`echo "(${freemem} + ${cachedmem} + ${buffermem}) / 1024" | bc`
   if [ `echo "$actualfree <= ($totalmem * 0.1)" | bc` -eq 1 ]; then mem="${bldred}${actualfree}M${txtrst}";
   elif [ `echo "$actualfree > ($totalmem * 0.1)" | bc` -eq 1 ] && [ `echo "$actualfree <= ($totalmem * 0.2)" | bc` -eq 1 ]; then mem="${txtylw}${actualfree}M${txtrst}";
@@ -81,6 +94,9 @@ function build_prompt {
   # add git information if applicable
   wd=`pwd | sed -E "s-^$HOME($|(/.*))-~\2-"`
   wd="${txtcyn}${wd}$(__git_ps1)${txtrst}"
+
+  # add aws default profile
+  aws="${txtpur}(${AWS_DEFAULT_PROFILE})${txtrst}"
 
   #printf ' %3s %-16s %-25s %-23s %7s %7s' $face $dt $userhost $mem $load $wd
   echo -e " ${face} ${dt} ${userhost} ${mem} ${load} ${wd}"

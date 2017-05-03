@@ -1,5 +1,6 @@
 #!/bin/bash
 
+alias anacon='export PATH="/home/smartin/anaconda2/bin:$PATH"'
 alias l="ls --color=auto -alh"
 alias dush="du -sh *"
 alias attach="screen -Adr"
@@ -34,7 +35,7 @@ sr() {
 }
 
 burner() {
-  docker run -it --rm $@
+  docker run -it --rm -v $(pwd):/pwd $@
 }
 
 bgburner() {
@@ -44,3 +45,16 @@ bgburner() {
 }
 
 alias el7pass="python -c 'import crypt,getpass; print(crypt.crypt(getpass.getpass(), crypt.mksalt(crypt.METHOD_SHA512)))'"
+
+pycompile() {
+  python -m py_compile $@
+}
+
+pynotebook() {
+  if [ "$1" != "" ]; then
+    d="$1"
+  else
+    d="$(pwd)"
+  fi
+  docker run --rm -it -p 8888:8888 -v "${d}":/home/jovyan/work/"$(basename $d)" -e PASSWORD=pornmuffins jupyter/minimal-notebook
+}

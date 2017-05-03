@@ -36,3 +36,11 @@ sr() {
 burner() {
   docker run -it --rm $@
 }
+
+bgburner() {
+  n=$RANDOM
+  docker run -d --name bgburner-$n $@
+  echo "container running: bgburner-$n"
+}
+
+alias el7pass="python -c 'import crypt,getpass; print(crypt.crypt(getpass.getpass(), crypt.mksalt(crypt.METHOD_SHA512)))'"

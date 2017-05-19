@@ -34,19 +34,9 @@ sr() {
   ssh root@$host $@
 }
 
-burner() {
-  docker run -it --rm $@
-}
-
 pycompile() {
   python -m py_compile $@
 }
 
-pynotebook() {
-  if [ "$1" != "" ]; then
-    d="$1"
-  else
-    d="$(pwd)"
-  fi
-  docker run --rm -it -p 8888:8888 -v "${d}":/home/jovyan/work/"$(basename $d)" -e PASSWORD=pornmuffins jupyter/minimal-notebook
-}
+alias pynotebook='docker run --rm -it -p 8888:8888 -v "$(pwd)":/home/jovyan/work/$(basename "`pwd`") -e PASSWORD=pornmuffins jupyter/minimal-notebook'
+alias burner='docker run --rm -it -v $(pwd):/workspace -v $HOME/.aws:/root/.aws -v $HOME/.ssh:/root/.ssh'

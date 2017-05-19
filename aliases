@@ -34,6 +34,8 @@ sr() {
   ssh root@$host $@
 }
 
+alias el7pass="python -c 'import crypt,getpass; print(crypt.crypt(getpass.getpass(), crypt.mksalt(crypt.METHOD_SHA512)))'"
+
 pycompile() {
   python -m py_compile $@
 }

@@ -41,4 +41,21 @@ pycompile() {
 }
 
 alias pynotebook='docker run --rm -it -p 8888:8888 -v "$(pwd)":/home/jovyan/work/$(basename "`pwd`") -e PASSWORD=pornmuffins jupyter/minimal-notebook'
-alias burner='docker run --rm -it -v $(pwd):/workspace -v $HOME/.aws:/root/.aws -v $HOME/.ssh:/root/.ssh'
+alias burner='sudo docker run --rm -it -w /workspace -v $(pwd):/workspace -v $HOME/.aws:/root/.aws -v $HOME/.ssh:/root/.ssh $@'
+
+randomword() {
+  words=($(grep '.\{3,8\}' /usr/share/dict/words | grep -P -v "[\x80-\xFF]" | grep -v "'"))
+  max=${#words[@]}
+  number=$RANDOM
+  let "number %= $max"
+  echo $(echo ${words[number]} | tr '[:upper:]' '[:lower:]')
+
+}
+
+alias awsssh='ssh -i ~/.ssh/aws $@'
+
+gcp() {
+  git commit -am "$@" && git push -u origin master
+}
+
+alias curlpip='echo "curl --silent --show-error --retry 5 https://bootstrap.pypa.io/get-pip.py | sudo python2.7"'

@@ -1,12 +1,11 @@
 #!/bin/bash
 
-alias anacon='export PATH="/home/smartin/anaconda2/bin:$PATH"'
 alias l="ls --color=auto -alh"
 alias dush="du -sh *"
 alias attach="screen -Adr"
 alias ack="ack-grep"
 
-# these load the ssh key as needed rather than ever damn time 
+# these load the ssh key as needed rather than ever damn time
 # i log the fuck in. see also: ssh-agent
 ssh() {
   if ! ssh-add -l >/dev/null 2>&-; then
@@ -42,6 +41,7 @@ pycompile() {
 
 alias pynotebook='docker run --rm -it -p 8888:8888 -v "$(pwd)":/home/jovyan/work/$(basename "`pwd`") -e PASSWORD=pornmuffins jupyter/minimal-notebook'
 alias burner='sudo docker run --rm -it -w /workspace -v $(pwd):/workspace -v $HOME/.aws:/root/.aws -v $HOME/.ssh:/root/.ssh $@'
+alias burner-ansible='sudo docker run --rm -it -w /workspace -v $(pwd):/workspace -v $HOME/.aws:/root/.aws -v $HOME/.ssh:/root/.ssh williamyeh/ansible:centos7 /bin/bash'
 
 randomword() {
   words=($(grep '.\{3,8\}' /usr/share/dict/words | grep -P -v "[\x80-\xFF]" | grep -v "'"))

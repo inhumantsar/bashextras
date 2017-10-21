@@ -3,6 +3,15 @@
 alias l="ls --color=auto -alh"
 alias dush="du -sh *"
 alias attach="screen -Adr"
+alias el7pass="python -c 'import crypt,getpass; print(crypt.crypt(getpass.getpass(), crypt.mksalt(crypt.METHOD_SHA512)))'"
+alias pynotebook='docker run --rm -it -p 8888:8888 -v "$(pwd)":/home/jovyan/work/$(basename "`pwd`") -e PASSWORD=pornmuffins jupyter/minimal-notebook'
+alias burner='docker run --rm -it -w /workspace -v $(pwd):/workspace -v $HOME/.ssh:/root/.ssh $@'
+alias burneransible='docker run --rm -it -w /workspace -v $(pwd):/workspace inhumantsar/ansible $@'
+alias burnerng='docker run --rm -it -w /workspace -v $(pwd):/workspace alexsuch/angular-cli ng $@ ; sudo chown -R $USER: $(pwd)'
+alias burnerngnpm='docker run --rm -it -w /workspace -v $(pwd):/workspace alexsuch/angular-cli npm $@ ; sudo chown -R $USER: $(pwd)'
+alias burnerngsh='docker run --rm -it -w /workspace -v $(pwd):/workspace alexsuch/angular-cli /bin/sh'
+alias burnerngserve='docker run --name ngserve --rm -it -w /workspace -v $(pwd):/workspace -p 4200:4200 alexsuch/angular-cli ng serve --host 0.0.0.0'
+alias curlpip='echo "curl --silent --show-error --retry 5 https://bootstrap.pypa.io/get-pip.py | sudo python2.7"'
 alias ack="ack-grep"
 
 # these load the ssh key as needed rather than ever damn time
@@ -33,15 +42,10 @@ sr() {
   ssh root@$host $@
 }
 
-alias el7pass="python -c 'import crypt,getpass; print(crypt.crypt(getpass.getpass(), crypt.mksalt(crypt.METHOD_SHA512)))'"
 
 pycompile() {
   python -m py_compile $@
 }
-
-alias pynotebook='docker run --rm -it -p 8888:8888 -v "$(pwd)":/home/jovyan/work/$(basename "`pwd`") -e PASSWORD=pornmuffins jupyter/minimal-notebook'
-alias burner='sudo docker run --rm -it -w /workspace -v $(pwd):/workspace -v $HOME/.aws:/root/.aws -v $HOME/.ssh:/root/.ssh $@'
-alias burner-ansible='sudo docker run --rm -it -w /workspace -v $(pwd):/workspace -v $HOME/.aws:/root/.aws -v $HOME/.ssh:/root/.ssh williamyeh/ansible:centos7 /bin/bash'
 
 randomword() {
   words=($(grep '.\{3,8\}' /usr/share/dict/words | grep -P -v "[\x80-\xFF]" | grep -v "'"))
@@ -57,5 +61,3 @@ alias awsssh='ssh -i ~/.ssh/aws $@'
 gcp() {
   git commit -am "$@" && git push -u origin master
 }
-
-alias curlpip='echo "curl --silent --show-error --retry 5 https://bootstrap.pypa.io/get-pip.py | sudo python2.7"'

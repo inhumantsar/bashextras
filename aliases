@@ -1,18 +1,35 @@
 #!/bin/bash
 
+alias attach="screen -Adr"
 alias l="ls --color=auto -alh"
 alias dush="du -sh *"
-alias attach="screen -Adr"
+alias ipa="ip -color -brief a"
+alias awsssh='ssh -i ~/.ssh/aws $@'
 alias el7pass="python -c 'import crypt,getpass; print(crypt.crypt(getpass.getpass(), crypt.mksalt(crypt.METHOD_SHA512)))'"
 alias pynotebook='docker run --rm -it -p 8888:8888 -v "$(pwd)":/home/jovyan/work/$(basename "`pwd`") -e PASSWORD=pornmuffins jupyter/minimal-notebook'
 alias burner='docker run --rm -it -w /workspace -v $(pwd):/workspace -v $HOME/.ssh:/root/.ssh $@'
-alias burneransible='docker run --rm -it -w /workspace -v $(pwd):/workspace inhumantsar/ansible $@'
-alias burnerng='docker run --rm -it -w /workspace -v $(pwd):/workspace alexsuch/angular-cli ng $@ ; sudo chown -R $USER: $(pwd)'
-alias burnerngnpm='docker run --rm -it -w /workspace -v $(pwd):/workspace alexsuch/angular-cli npm $@ ; sudo chown -R $USER: $(pwd)'
-alias burnerngsh='docker run --rm -it -w /workspace -v $(pwd):/workspace alexsuch/angular-cli /bin/sh'
-alias burnerngserve='docker run --name ngserve --rm -it -w /workspace -v $(pwd):/workspace -p 4200:4200 alexsuch/angular-cli ng serve --host 0.0.0.0'
+alias dansible='docker run --rm -it -w /workspace -v $(pwd):/workspace inhumantsar/ansible:centos7 $@'
+alias dansible-alpine='docker run --rm -it -w /workspace -v $(pwd):/workspace inhumantsar/ansible $@'
 alias curlpip='echo "curl --silent --show-error --retry 5 https://bootstrap.pypa.io/get-pip.py | sudo python2.7"'
 alias ack="ack-grep"
+alias aaxtomp3='AAXtoMP3 b995d806 ' # https://github.com/KrumpetPirate/AAXtoMP3/
+
+ansible-fact() {
+  if [[ "$1" != "" ]]; then
+    filename="/tmp/ansible-fact-$1.yml"
+    echo """---
+- hosts: localhost
+  connection: local
+  tasks:
+    - debug:
+        var: $1
+""" > $filename
+    ansible-playbook -i localhost, $filename
+  else
+    ansible localhost -c local -i localhost, -m setup
+  fi
+}
+
 
 # these load the ssh key as needed rather than ever damn time
 # i log the fuck in. see also: ssh-agent
@@ -56,8 +73,8 @@ randomword() {
 
 }
 
-alias awsssh='ssh -i ~/.ssh/aws $@'
-
 gcp() {
-  git commit -am "$@" && git push -u origin master
+  local b=$(git symbolic-ref --short -q HEAD)
+  git commit -am "$@" && git push -u origin $b
 }
+

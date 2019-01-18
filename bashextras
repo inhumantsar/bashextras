@@ -15,12 +15,12 @@ if [ "$DESKTOP_SESSION" == "" ]; then
 fi
 
 # ssh agent
-source $DIR/ssh_agent
+ps -p $SSH_AGENT_PID > /dev/null || eval $(ssh-agent -s)
 
 # handy colour names
 source "$DIR/promptcolours"
 
-# to add git branch to PS1
+# for git info in ps1
 source "$DIR/gitprompt"
 
 # aliases
@@ -45,61 +45,87 @@ if [ `uname -s` == "Darwin" ]; then
   fi
 fi
 
+
 # awscli bash completion
 if [ -f /usr/local/bin/aws ] && [ -f /usr/local/bin/aws_completer ]; then
   complete -C '/usr/local/bin/aws_completer' aws
 fi
 
 
+# Actions specific to Windows Subsystem for Linux
+if grep -q Microsoft /proc/version; then
+  export IS_WSL=true
+  # for docker (also vagrant), requires Docker on Windows.
+  export DOCKER_HOST=tcp://127.0.0.1:2375
+  # for vagrant
+  export VAGRANT_WSL_ENABLE_WINDOWS_ACCESS="1"
+  export PATH="$PATH:/mnt/c/Program Files/Oracle/VirtualBox"
+  # other vagrant vars include:
+  # VAGRANT_WSL_WINDOWS_ACCESS_USER - Override current Windows username
+  # VAGRANT_WSL_DISABLE_VAGRANT_HOME - Do not modify the VAGRANT_HOME variable
+  # VAGRANT_WSL_WINDOWS_ACCESS_USER_HOME_PATH - Custom Windows system home path
+else
+  export IS_WSL=false
+  export VAGRANT_WSL_ENABLE_WINDOWS_ACCESS="0"
+fi
+
+
 # eye candy
 function build_prompt {
-  exitcode=$?
 
   # build exit code smiley
-  face="${bldylw}O.o${txtrst}" # confused by default
-  if [ $exitcode -eq 0 ]; then face="${txtgrn}^_^${txtrst}"; else face="${bldred}0_0${txtrst}"; fi
+  if [ $? -eq 0 ]; then 
+    face="${txtgrn}^_^${txtrst}"
+  else
+    face="${bldred}0_0${txtrst}"
+  fi
 
   # build date time
-  dt="${txtcyn}`date +\"%H:%M:%S"`${txtrst}"
+  dt="${txtcyn}`date +\"%H:%M:%S\"`${txtrst}"
 
-  # build free memory
-  mem=''
-  freemem=`sed -n "s/^MemFree:[\t ]\+\([0-9]\+\) kB/\1/p" /proc/meminfo`
-  cachedmem=`sed -n "s/^Cached:[\t ]\+\([0-9]\+\) kB/\1/p" /proc/meminfo`
-  buffermem=`sed -n "s/^Buffers:[\t ]\+\([0-9]\+\) kB/\1/p" /proc/meminfo`
-  totalmem=`echo "$(sed -n 's/MemTotal:[\t ]\+\([0-9]\+\) kB/\1/p' /proc/meminfo) / 1024" | bc`
-  actualfree=`echo "(${freemem} + ${cachedmem} + ${buffermem}) / 1024" | bc`
-  if [ `echo "$actualfree <= ($totalmem * 0.1)" | bc` -eq 1 ]; then mem="${bldred}${actualfree}M${txtrst}";
-  elif [ `echo "$actualfree > ($totalmem * 0.1)" | bc` -eq 1 ] && [ `echo "$actualfree <= ($totalmem * 0.2)" | bc` -eq 1 ]; then mem="${txtylw}${actualfree}M${txtrst}";
-  else mem="${txtgrn}${actualfree}M${txtrst}"
-  fi
-  mem="(${mem})"
+  # load and memory
+  if [ "$IS_WSL" = true ]; then
+    # for linux-on-windows (sad trombone)
+    memload=""
 
-  # build load display
-  load=""
-  load_1min=`echo $(< /proc/loadavg) | cut -f 1 -d\ `
-  cpucount=`grep -c ^processor /proc/cpuinfo`
-  if [ `echo "$load_1min >= $cpucount" | bc` -eq 1 ]; then load="${bldred}${load_1min}${txtrst}";
-  elif [ `echo "$load_1min >= ($cpucount/2)" | bc` -eq 1 ] && [ `echo "$load_1min < $cpucount" | bc` -eq 1 ]; then load="${txtylw}${load_1min}${txtrst}";
-  else load="${txtgrn}${load_1min}${txtrst}"
+  else
+    # for everyone else
+    # build free memory (not WSL friendly -- too slow)
+    mem=$(free -m | grep "Mem:" | sed -re 's/\s+/ /g')
+    freemem=$(echo "$mem" | cut -f4 -d\ )
+    totalmem=$(echo "$mem" | cut -f2 -d\ )
+    if [[ `echo "$freemem <= ($totalmem * 0.1)" | bc` -eq 1 ]]; then 
+      mem="${bldred}${freemem}M${txtrst}";
+    elif [[ `echo "$freemem > ($totalmem * 0.1)" | bc` -eq 1 ]] && [[ `echo "$freemem <= ($totalmem * 0.2)" | bc` -eq 1 ]]; then 
+      mem="${txtylw}${freemem}M${txtrst}"
+    else 
+      mem="${txtgrn}${freemem}M${txtrst}"
+    fi
+
+    # build load display (not WSL friendly -- load avgs hardcoded: https://github.com/Microsoft/WSL/issues/2814)
+    load_1min=`echo $(< /proc/loadavg) | cut -f 1 -d\ `
+    cpucount=`grep -c ^processor /proc/cpuinfo`
+    if [ `echo "$load_1min >= $cpucount" | bc` -eq 1 ]; then 
+      load="${bldred}${load_1min}${txtrst}";
+    elif [ `echo "$load_1min >= ($cpucount/2)" | bc` -eq 1 ] && [ `echo "$load_1min < $cpucount" | bc` -eq 1 ]; then 
+      load="${txtylw}${load_1min}${txtrst}"
+    else 
+      load="${txtgrn}${load_1min}${txtrst}"
+    fi
+    memload="${mem} ${load} "
   fi
-  load="(${load})"
 
   # get user and host names
-  user=`whoami`
-  host=`hostname -s`
-  userhost="${txtwht}[${user}@${host}]${txtrst}"
+  userhost="${txtwht}[${USER}@${HOSTNAME}]${txtrst}"
 
   # get pwd. this emulates bash's expansion of \w to give ~ instead of /home/moo
   # add git information if applicable
   wd=`pwd | sed -E "s-^$HOME($|(/.*))-~\2-"`
-  wd="${txtcyn}${wd}$(__git_ps1)${txtrst}"
+  # wd=$(pwd)
+  wd="${txtcyn}${wd}${txtrst}$(__git_ps1)"
 
-  # add aws default profile
-  aws="${txtpur}(${AWS_DEFAULT_PROFILE})${txtrst}"
-
-  #printf ' %3s %-16s %-25s %-23s %7s %7s' $face $dt $userhost $mem $load $wd
-  echo -e " ${face} ${dt} ${userhost} ${mem} ${load} ${wd}"
+  # print it all
+  echo -e " ${face} ${dt} ${userhost} ${memload}${wd}"
 }
 
 PROMPT_COMMAND='build_prompt'

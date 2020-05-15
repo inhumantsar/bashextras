@@ -4,13 +4,11 @@ alias attach="screen -Adr"
 alias l="ls --color=auto -alh"
 alias dush="du -sh *"
 alias ipa="ip -color -brief a"
-alias awsssh='ssh -i ~/.ssh/aws $@'
 alias el7pass="python -c 'import crypt,getpass; print(crypt.crypt(getpass.getpass(), crypt.mksalt(crypt.METHOD_SHA512)))'"
 alias pynotebook='docker run --rm -it -p 8888:8888 -v "$(pwd)":/home/jovyan/work/$(basename "`pwd`") -e PASSWORD=pornmuffins jupyter/minimal-notebook'
 alias burner='docker run --rm -it -w /workspace -v $(pwd):/workspace -v $HOME/.ssh:/root/.ssh $@'
 alias dansible='docker run --rm -it -w /workspace -v $(pwd):/workspace inhumantsar/ansible:centos7 $@'
 alias dansible-alpine='docker run --rm -it -w /workspace -v $(pwd):/workspace inhumantsar/ansible $@'
-alias curlpip='echo "curl --silent --show-error --retry 5 https://bootstrap.pypa.io/get-pip.py | sudo python2.7"'
 alias ack="ack-grep"
 alias aaxtomp3='AAXtoMP3 b995d806 ' # https://github.com/KrumpetPirate/AAXtoMP3/
 
@@ -43,72 +41,4 @@ gcp() {
   git commit -am "$@" && git push -u origin $b
 }
 
-github-create() {
-  HELP="""Creates a GitHub repo, sets it as the remote 'origin' for the local git repo, pushes.
-
-  Will init and do an initial commit if necessary. Repo name is necessary if description is provided.
-
-  WARNING: Storing tokens and passwords with this is insecure, use a token with only the 'repo' scope and rotate frequently.
-
-  Usage: 
-    $0 -h|--help                          - Shows this message
-    $0 'repo-name' 'Some quoted desc'     - Creates a new GitHub repo with that name & (optional) description.
-    $0                                    - Creates a new GitHub repo using dir name for the repo name.
-  """
-
-  # show help and exit if necessary
-  ([ "${1}" == "-h" ] || [ "${1}" == "--help" ]) && echo -e "${HELP}" && return 0
-
-  # init if necessary
-  if [ "$(git log --sparse --oneline -n 1 2> /dev/null || echo '')" == "" ]; then 
-    git init && git add . && git commit -am 'initial commit'
-  fi
-
-  # get/store github username
-  GH_USER=$(git config github.user)
-  GH_TOKEN=$(git config github.token)
-  while [ "${GH_USER}" == "" ] || [ "${GH_TOKEN}" == "" ]; do
-    read -p "GitHub username: " GH_USER
-    read -s -p "GitHub pass/token: " GH_TOKEN
-    echo ""                                                  # reads which mask input don't leave a newline at the end.
-    read -p "Store globally for all repos? [Y|n]" YN
-    if [[ $YN =~ ^[Yy]$ ]]; then
-      git config --global github.user "${GH_USER}"
-      git config --global github.token "${GH_TOKEN}"
-    fi
-  done
-
-  # get 2FA code
-  read -p "2FA token (blank to skip): " GH_TFA
-
-  # get repo name & description
-  if [ "${1}" != "" ]; then
-		REPONAME="${1}"
-    DESCRIPTION="${2}"
-	else
-		REPONAME="$(basename `pwd`)"
-		DESCRIPTION=""
-	fi
-
-  # create repo
-  R=$(curl --silent --write-out "HTTPCODE:%{http_code}" -i -u "${GH_USER}:${GH_TOKEN}" -H "X-GitHub-OTP: ${GH_TFA}" \
-      https://api.github.com/user/repos \
-      -d "{\
-			  \"name\": \"${REPONAME}\", \
-  			\"description\": \"${DESCRIPTION}\", \
-  			\"private\": false, \
-  			\"has_issues\": true, \
-  			\"has_downloads\": true, \
-  			\"has_wiki\": false \
-	}")
-
-  R_BODY=$(echo $R | sed -E 's/HTTPCODE\:[0-9]{3}$//')
-  R_CODE=$(echo $R | tr -d '\n' | sed -E 's/.*HTTPCODE:([0-9]{3})$/\1/')
-
-  # bail out if we get a bad HTTP status code back
-  [[ $R_CODE -gt 299 ]] && echo -e "\nERROR! Unable to create repository. See output below for details.\n\n$R_BODY" && return 1
-	
-	git remote add origin "git@github.com:${GH_USER}/${REPONAME}.git"
-	git push -u origin master
-}
 

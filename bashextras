@@ -14,14 +14,15 @@ if [ "$DESKTOP_SESSION" == "" ]; then
   unset SSH_ASKPASS
 fi
 
+# set up userspace bin dir
+[ ! -d $HOME/.bin ] && mkdir $HOME/.bin
+PATH="${PATH}:$HOME/.bin"
+
 # ssh agent
 ps -p $SSH_AGENT_PID > /dev/null || eval $(ssh-agent -s)
 
 # handy colour names
 source "$DIR/promptcolours"
-
-# for git info in ps1
-source "$DIR/gitprompt"
 
 # aliases
 source "$DIR/aliases"
@@ -70,6 +71,48 @@ else
 fi
 
 
+# set up fira code font if necessary
+[ -d $HOME/.local/share/fonts ] || mkdir -p $HOME/.local/share/fonts
+if [ ! -f $HOME/.local/share/fonts/FiraCode-Retina.ttf ]; then
+  # install
+  for type in Bold Light Medium Regular Retina; do
+    file_path="${HOME}/.local/share/fonts/FiraCode-${type}.ttf"
+    file_url="https://github.com/tonsky/FiraCode/blob/master/distr/ttf/FiraCode-${type}.ttf?raw=true"
+    if [ ! -e "${file_path}" ]; then
+        echo "installing FiraCode-${type}"
+        wget -O "${file_path}" "${file_url}"
+    fi
+  done
+
+  # configure vs code
+  if [ -d $HOME/.config/Code/User ]; then
+    VSCODE_SETTINGS=$HOME/.config/Code/User/settings.json
+    if [ ! -f $VSCODE_SETTINGS ]; then
+      echo '{"editor.fontFamily": "Fira Code Retina", "editor.fontLigatures": true}' > $VSCODE_SETTINGS
+    else
+      jq '.{"editor.fontFamily"} = "Fira Code Retina"' $VSCODE_SETTINGS > $VSCODE_SETTINGS
+      jq '.{"editor.fontLigatures"} = true' $VSCODE_SETTINGS > $VSCODE_SETTINGS
+    fi
+  fi
+  
+  # configure tilix
+  dconf load /com/gexperts/Tilix/ < $DIR/tilix.dconf
+fi
+  
+# install starship if necessary
+if ! type starship &> /dev/null; then
+
+  # set up starship
+  curl -fsSL https://starship.rs/install.sh | bash -s -- -b $HOME/.bin
+
+  # write preferred configs to file
+  mkdir -p ~/.config
+  cp $DIR/starship.toml ~/.config/
+fi
+
+eval "$(starship init bash)"
+
+### the following deprecated in favour of starship
 # eye candy
 function build_prompt {
 
@@ -128,5 +171,5 @@ function build_prompt {
   echo -e " ${face} ${dt} ${userhost} ${memload}${wd}"
 }
 
-PROMPT_COMMAND='build_prompt'
-PS1="\$ "
+#PROMPT_COMMAND='build_prompt'
+#PS1="\$ "
